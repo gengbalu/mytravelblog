@@ -51,8 +51,8 @@ git push -u origin main
 | 设置项 | 值 |
 |--------|-----|
 | **Framework preset** | Next.js |
-| **Build command** | `npm run build` |
-| **Build output directory** | `.next` |
+| **Build command** | `npm run build:cloudflare` |
+| **Build output directory** | `.open-next/assets` |
 | **Root directory** | `/` |
 
 ### 步骤 4：配置环境变量 ⚠️ 重要！

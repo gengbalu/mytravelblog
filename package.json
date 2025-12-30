@@ -1,10 +1,11 @@
 {
-  "name": "crystal-ride",
-  "version": "0.1.0",
+  "name": "mytravelblog",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "npx @opennextjs/cloudflare build",
     "start": "next start",
     "lint": "eslint"
   },
