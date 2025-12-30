@@ -1,9 +1,8 @@
-import { Client } from '@notionhq/client';
+// Notion API 集成 - 使用原生 fetch 以兼容 Edge Runtime
+// 此实现不依赖 @notionhq/client，适用于 Cloudflare Workers/Pages
 
-// 初始化 Notion 客户端
-const notion = new Client({
-    auth: process.env.NOTION_API_KEY,
-});
+const NOTION_API_URL = 'https://api.notion.com/v1';
+const NOTION_VERSION = '2022-06-28';
 
 // 类型定义
 export interface NotionMember {
@@ -36,6 +35,30 @@ export interface NotionPhoto {
     src: string;
     alt: string;
     location: string;
+}
+
+// Notion API 请求辅助函数
+async function notionFetch(endpoint: string, body?: object) {
+    const apiKey = process.env.NOTION_API_KEY;
+    if (!apiKey) {
+        throw new Error('NOTION_API_KEY not configured');
+    }
+
+    const response = await fetch(`${NOTION_API_URL}${endpoint}`, {
+        method: body ? 'POST' : 'GET',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Notion-Version': NOTION_VERSION,
+            'Content-Type': 'application/json',
+        },
+        body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Notion API error: ${response.status}`);
+    }
+
+    return response.json();
 }
 
 // 辅助函数：安全获取属性值
@@ -83,12 +106,12 @@ export async function getMembers(): Promise<NotionMember[]> {
     }
 
     try {
-        const response = await notion.databases.query({
-            database_id: databaseId,
+        const response = await notionFetch(`/databases/${databaseId}/query`, {
             sorts: [{ property: 'Order', direction: 'ascending' }],
         });
 
-        return response.results.map((page) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return response.results.map((page: any) => ({
             id: page.id,
             name: getPropertyValue(page, 'Name') as string,
             avatar: getPropertyValue(page, 'Avatar') as string,
@@ -110,8 +133,7 @@ export async function getStories(): Promise<NotionStory[]> {
     }
 
     try {
-        const response = await notion.databases.query({
-            database_id: databaseId,
+        const response = await notionFetch(`/databases/${databaseId}/query`, {
             filter: {
                 property: 'Published',
                 checkbox: { equals: true },
@@ -119,7 +141,8 @@ export async function getStories(): Promise<NotionStory[]> {
             sorts: [{ property: 'Date', direction: 'descending' }],
         });
 
-        return response.results.map((page) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return response.results.map((page: any) => ({
             id: page.id,
             title: getPropertyValue(page, 'Title') as string,
             excerpt: getPropertyValue(page, 'Excerpt') as string,
@@ -149,12 +172,12 @@ export async function getPhotos(): Promise<NotionPhoto[]> {
     }
 
     try {
-        const response = await notion.databases.query({
-            database_id: databaseId,
+        const response = await notionFetch(`/databases/${databaseId}/query`, {
             sorts: [{ property: 'Order', direction: 'ascending' }],
         });
 
-        return response.results.map((page) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return response.results.map((page: any) => ({
             id: page.id,
             src: getPropertyValue(page, 'Image') as string,
             alt: getPropertyValue(page, 'Alt') as string,
