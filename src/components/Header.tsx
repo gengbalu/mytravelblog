@@ -2,20 +2,12 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, X, Compass, LogOut, BookOpen, Camera, Footprints } from 'lucide-react';
+import { Menu, X, Compass, BookOpen, Camera, Footprints } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-    router.refresh();
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,18 +93,9 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* User Actions - 右侧：主题切换 + 登录（间距加大） */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* User Actions - 右侧：仅主题切换 */}
+          <div className="hidden md:flex items-center">
             <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className={`flex items-center gap-1.5 text-sm py-2 px-4 rounded-full font-semibold transition-all border-2 ${isScrolled
-                ? 'border-red-400 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500'
-                : 'border-white/50 text-white hover:bg-white/10'
-                }`}>
-              <LogOut className="w-4 h-4" />
-              退出
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -161,14 +144,7 @@ export default function Header() {
               <Camera className="w-4 h-4" />
               查看相册
             </Link>
-            <div className="flex gap-4 mt-4 pt-4 border-t border-[var(--border)]">
-              <button
-                onClick={handleLogout}
-                className="btn-secondary flex-1 text-sm py-2 flex items-center justify-center gap-1 text-red-500 border-red-400 hover:bg-red-500 hover:text-white">
-                <LogOut className="w-4 h-4" />
-                退出登录
-              </button>
-            </div>
+
           </nav>
         )}
       </div>
